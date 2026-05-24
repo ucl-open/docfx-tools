@@ -29,10 +29,22 @@ export default {
     renderElement: function(element) {
         element.classList.add("hljs");
         const img = element.querySelector("img");
-        const workflowPath = img.src;
-        img.src = workflowPath.replace(/\.[^.]+$/, ".svg");
+        const path = img.src;
+        const rel = document.querySelector('meta[name="docfx:rel"]')?.content ?? '';
 
-        const wrap = this.createCodeContainer(workflowPath);
+        let bonsaiPath, svgPath;
+        if (path.endsWith('.bonsai')) {
+            bonsaiPath = path;
+            svgPath = path.replace(/\.bonsai$/, '.svg');
+        } else {
+            svgPath = path;
+            bonsaiPath = img.dataset.bonsai
+                ? img.dataset.bonsai.replace(/^~\//, rel)
+                : path.replace(/\.svg$/, '.bonsai');
+        }
+
+        img.src = svgPath;
+        const wrap = this.createCodeContainer(bonsaiPath);
         const parent = element.parentElement;
         parent.insertBefore(wrap, element);
         wrap.appendChild(element);
